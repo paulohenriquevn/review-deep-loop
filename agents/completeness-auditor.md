@@ -251,7 +251,7 @@ Write the full completeness audit to `{{OUTPUT_DIR}}/findings/completeness/compl
 ```bash
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --db-path {{OUTPUT_DIR}}/review.db \
-  --from-agent completeness-auditor --phase 4 --iteration N \
+  --from-agent completeness-auditor --phase 2 --iteration N \
   --message-type finding \
   --content "Completeness audit complete. X/Y features complete (Z%). Dead code: D files. Stubs: S. Silent failures: F." \
   --metadata-json '{"features_promised": X, "features_complete": Y, "features_partial": Z, "features_missing": W, "dead_code": D, "stubs": S, "silent_failures": F}'

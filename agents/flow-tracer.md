@@ -34,16 +34,16 @@ Search for all entry points in the codebase:
 
 ```bash
 # HTTP endpoints
-grep -rn "app.route\|@app.get\|@app.post\|@app.put\|@app.delete\|HandleFunc\|router\." --include="*.py" --include="*.go" --include="*.ts" --include="*.java" -l
+grep -rn "app.route\|@app.get\|@app.post\|@app.put\|@app.delete\|HandleFunc\|router\." --include="*.py" --include="*.go" --include="*.ts" --include="*.java" -l {{TARGET_DIR}}
 
 # CLI commands
-grep -rn "click.command\|argparse\|cobra\|typer\|@app.command" --include="*.py" --include="*.go" --include="*.ts" -l
+grep -rn "click.command\|argparse\|cobra\|typer\|@app.command" --include="*.py" --include="*.go" --include="*.ts" -l {{TARGET_DIR}}
 
 # Queue consumers / event handlers
-grep -rn "consume\|on_message\|subscribe\|@event_handler\|celery.task\|@task" --include="*.py" --include="*.go" --include="*.ts" -l
+grep -rn "consume\|on_message\|subscribe\|@event_handler\|celery.task\|@task" --include="*.py" --include="*.go" --include="*.ts" -l {{TARGET_DIR}}
 
 # Cron jobs / scheduled tasks
-grep -rn "schedule\|cron\|periodic_task\|@scheduled" --include="*.py" --include="*.go" --include="*.ts" -l
+grep -rn "schedule\|cron\|periodic_task\|@scheduled" --include="*.py" --include="*.go" --include="*.ts" -l {{TARGET_DIR}}
 ```
 
 ### Step 2: Follow the Call Chain
@@ -52,13 +52,13 @@ For each entry point, follow the delegation chain through the code:
 
 ```bash
 # Find service/handler calls from controllers
-grep -rn "service\.\|handler\.\|usecase\.\|interactor\." --include="*.py" --include="*.go" --include="*.ts"
+grep -rn "service\.\|handler\.\|usecase\.\|interactor\." --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}}
 
 # Find repository/store calls from services
-grep -rn "repository\.\|repo\.\|store\.\|dao\.\|db\." --include="*.py" --include="*.go" --include="*.ts"
+grep -rn "repository\.\|repo\.\|store\.\|dao\.\|db\." --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}}
 
 # Find external calls (HTTP, queue, cache)
-grep -rn "requests\.\|http\.\|fetch\|axios\|publish\|enqueue\|redis\.\|cache\." --include="*.py" --include="*.go" --include="*.ts"
+grep -rn "requests\.\|http\.\|fetch\|axios\|publish\|enqueue\|redis\.\|cache\." --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}}
 ```
 
 ### Step 3: Map State Transitions
@@ -209,11 +209,10 @@ python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-finding \
     "title": "Order flow has no transaction rollback on payment failure",
     "severity": "critical",
     "category": "completeness",
-    "phase_found": 1,
+    "phase": 1,
     "description": "When payment service returns an error after order is saved to DB, the order remains in created state with no cleanup. This can lead to orphaned orders that are never charged.",
     "file_path": "src/services/order_service.py",
-    "line_start": 45,
-    "line_end": 72,
+    "line_range": "45-72",
     "recommendation": "Wrap order creation + payment in a transaction or implement a saga pattern with compensating actions."
   }'
 ```
@@ -238,7 +237,7 @@ Record a message summarizing your work:
 ```bash
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --db-path {{OUTPUT_DIR}}/review.db \
-  --from-agent flow-tracer --phase N \
+  --from-agent flow-tracer --phase N --iteration M \
   --content "Flow tracing complete. Identified X flows, mapped Y sequence diagrams. Found Z issues: [summary]." \
   --metadata-json '{"flows_identified": X, "diagrams_produced": Y, "issues_found": Z, "critical_issues": W}'
 ```

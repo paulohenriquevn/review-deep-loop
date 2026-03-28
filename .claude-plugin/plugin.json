@@ -1,0 +1,21 @@
+{
+  "name": "review-deep-loop",
+  "version": "1.0.0",
+  "description": "Autonomous deep software review laboratory for Claude Code. Point it at any codebase and it systematically audits architecture, completeness, code quality, infrastructure, security, threat models, and operational readiness — producing a prioritized findings report with evidence-backed recommendations.",
+  "author": {
+    "name": "Paulo (usemacaw)",
+    "email": "paulo@usemacaw.com"
+  },
+  "repository": "https://github.com/paulohenriquevn/review-deep-loop",
+  "license": "MIT",
+  "keywords": [
+    "code-review",
+    "security-audit",
+    "architecture-review",
+    "threat-modeling",
+    "software-quality",
+    "autonomous-agents",
+    "ralph-wiggum",
+    "autoresearch"
+  ]
+}

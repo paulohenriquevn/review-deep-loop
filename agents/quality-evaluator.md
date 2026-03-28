@@ -190,7 +190,7 @@ When a phase FAILS quality evaluation, the following recovery protocol applies:
 ```bash
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --db-path {{OUTPUT_DIR}}/review.db \
-  --from-agent quality-evaluator --phase N \
+  --from-agent quality-evaluator --phase N --iteration M \
   --content "SPECIFIC_DEFICIENCIES_AND_REQUIRED_FIXES" \
   --metadata-json '{"score": 0.XX, "failed_dimensions": [...], "issues": [...]}'
 ```

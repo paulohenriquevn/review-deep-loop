@@ -264,7 +264,7 @@ Write the full code review to `{{OUTPUT_DIR}}/findings/code/code_review.md`:
 ```bash
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --db-path {{OUTPUT_DIR}}/review.db \
-  --from-agent code-reviewer --phase 3 --iteration N \
+  --from-agent code-reviewer --phase 4 --iteration N \
   --message-type finding \
   --content "Deep code review complete. X files reviewed on Y critical paths. Z findings: A critical, B high. Key concern: [summary]." \
   --metadata-json '{"files_reviewed": X, "critical_paths": Y, "total_findings": Z, "critical": A, "high": B, "medium": C, "low": D}'

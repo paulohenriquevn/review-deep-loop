@@ -29,16 +29,16 @@ Can someone new set up and run this project from documentation alone?
 
 ```bash
 # Check setup documentation
-find . -type f \( -name "README*" -o -name "CONTRIBUTING*" -o -name "DEVELOPMENT*" -o -name "SETUP*" -o -name "INSTALL*" \) | head -10
+find {{TARGET_DIR}} -type f \( -name "README*" -o -name "CONTRIBUTING*" -o -name "DEVELOPMENT*" -o -name "SETUP*" -o -name "INSTALL*" \) | head -10
 
 # Check for setup scripts / Makefile
-find . -type f \( -name "Makefile" -o -name "docker-compose*" -o -name "setup.*" -o -name ".env.example" -o -name ".env.sample" \) | head -10
+find {{TARGET_DIR}} -type f \( -name "Makefile" -o -name "docker-compose*" -o -name "setup.*" -o -name ".env.example" -o -name ".env.sample" \) | head -10
 
 # Check prerequisites documentation
-grep -rn "prerequisites\|requirements\|install\|setup\|getting.started" --include="*.md" | head -20
+grep -rn "prerequisites\|requirements\|install\|setup\|getting.started" --include="*.md" {{TARGET_DIR}} | head -20
 
 # Check for environment variable documentation
-grep -rn "os\.environ\|os\.getenv\|process\.env\|viper\.\|env\." --include="*.py" --include="*.go" --include="*.ts" | head -30
+grep -rn "os\.environ\|os\.getenv\|process\.env\|viper\.\|env\." --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}} | head -30
 ```
 
 **Checklist for new developer experience:**
@@ -58,16 +58,16 @@ What happens when each external dependency is unavailable?
 
 ```bash
 # Find all external dependencies
-grep -rn "connect\|connection_string\|DATABASE_URL\|REDIS_URL\|AMQP_URL\|KAFKA_BROKER\|API_URL\|BASE_URL" --include="*.py" --include="*.go" --include="*.ts" --include="*.yaml" --include="*.env*" | head -30
+grep -rn "connect\|connection_string\|DATABASE_URL\|REDIS_URL\|AMQP_URL\|KAFKA_BROKER\|API_URL\|BASE_URL" --include="*.py" --include="*.go" --include="*.ts" --include="*.yaml" --include="*.env*" {{TARGET_DIR}} | head -30
 
 # Check for circuit breaker / retry / fallback patterns
-grep -rn "circuit_breaker\|retry\|fallback\|timeout\|backoff\|resilience" --include="*.py" --include="*.go" --include="*.ts" -l
+grep -rn "circuit_breaker\|retry\|fallback\|timeout\|backoff\|resilience" --include="*.py" --include="*.go" --include="*.ts" -l {{TARGET_DIR}}
 
 # Check health checks
-grep -rn "health\|readiness\|liveness" --include="*.py" --include="*.go" --include="*.ts" --include="*.yaml" -l
+grep -rn "health\|readiness\|liveness" --include="*.py" --include="*.go" --include="*.ts" --include="*.yaml" -l {{TARGET_DIR}}
 
 # Check for graceful degradation
-grep -rn "degrade\|fallback\|cache.*miss\|default.*value\|offline" --include="*.py" --include="*.go" --include="*.ts" | head -20
+grep -rn "degrade\|fallback\|cache.*miss\|default.*value\|offline" --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}} | head -20
 ```
 
 **Simulate these failures mentally:**
@@ -87,10 +87,10 @@ grep -rn "degrade\|fallback\|cache.*miss\|default.*value\|offline" --include="*.
 
 ```bash
 # Find input handling
-grep -rn "request\.\|req\.\|params\.\|body\.\|query\.\|args\." --include="*.py" --include="*.go" --include="*.ts" | head -30
+grep -rn "request\.\|req\.\|params\.\|body\.\|query\.\|args\." --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}} | head -30
 
 # Find validation
-grep -rn "validate\|validator\|schema\|pydantic\|marshmallow\|zod\|joi\|cerberus" --include="*.py" --include="*.go" --include="*.ts" -l
+grep -rn "validate\|validator\|schema\|pydantic\|marshmallow\|zod\|joi\|cerberus" --include="*.py" --include="*.go" --include="*.ts" -l {{TARGET_DIR}}
 ```
 
 **Test these inputs mentally:**
@@ -110,16 +110,16 @@ grep -rn "validate\|validator\|schema\|pydantic\|marshmallow\|zod\|joi\|cerberus
 
 ```bash
 # Deployment configuration
-find . -type f \( -name "Dockerfile*" -o -name "docker-compose*" -o -name "*.tf" -o -name "*.yaml" -o -name "*.yml" \) -path "*deploy*" -o -path "*k8s*" -o -path "*infra*" | head -20
+find {{TARGET_DIR}} -type f \( -name "Dockerfile*" -o -name "docker-compose*" -o -name "*.tf" -o -name "*.yaml" -o -name "*.yml" \) -path "*deploy*" -o -path "*k8s*" -o -path "*infra*" | head -20
 
 # Rollback mechanisms
-grep -rn "rollback\|migration.*down\|revert\|undo\|previous.version" --include="*.py" --include="*.go" --include="*.ts" --include="*.yaml" --include="*.sh" | head -20
+grep -rn "rollback\|migration.*down\|revert\|undo\|previous.version" --include="*.py" --include="*.go" --include="*.ts" --include="*.yaml" --include="*.sh" {{TARGET_DIR}} | head -20
 
 # Database migrations
-find . -type f -path "*migration*" -o -path "*migrate*" | head -20
+find {{TARGET_DIR}} -type f -path "*migration*" -o -path "*migrate*" | head -20
 
 # Feature flags
-grep -rn "feature_flag\|feature_toggle\|flag.*enabled\|toggle\|unleash\|launchdarkly\|flipper" --include="*.py" --include="*.go" --include="*.ts" --include="*.yaml" -l
+grep -rn "feature_flag\|feature_toggle\|flag.*enabled\|toggle\|unleash\|launchdarkly\|flipper" --include="*.py" --include="*.go" --include="*.ts" --include="*.yaml" -l {{TARGET_DIR}}
 ```
 
 **Operational scenarios to validate:**
@@ -142,16 +142,16 @@ Search for things that require insider knowledge:
 
 ```bash
 # Comments that reveal tribal knowledge
-grep -rn "HACK\|FIXME\|TODO\|WORKAROUND\|XXX\|NOTE:.*careful\|NOTE:.*important\|don't.*change\|do not.*modify\|magic\|trick" --include="*.py" --include="*.go" --include="*.ts" --include="*.java" | head -30
+grep -rn "HACK\|FIXME\|TODO\|WORKAROUND\|XXX\|NOTE:.*careful\|NOTE:.*important\|don't.*change\|do not.*modify\|magic\|trick" --include="*.py" --include="*.go" --include="*.ts" --include="*.java" {{TARGET_DIR}} | head -30
 
 # Undocumented configuration
-grep -rn "os\.environ\|os\.getenv\|process\.env" --include="*.py" --include="*.go" --include="*.ts" | grep -v "test" | head -30
+grep -rn "os\.environ\|os\.getenv\|process\.env" --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}} | grep -v "test" | head -30
 
 # Implicit ordering or dependencies
-grep -rn "must.*before\|should.*first\|depends.*on\|order.*matters\|sequence.*important" --include="*.py" --include="*.go" --include="*.ts" --include="*.md" | head -20
+grep -rn "must.*before\|should.*first\|depends.*on\|order.*matters\|sequence.*important" --include="*.py" --include="*.go" --include="*.ts" --include="*.md" {{TARGET_DIR}} | head -20
 
 # Manual steps mentioned in code
-grep -rn "manually\|manual step\|run this\|execute this\|remember to\|don't forget" --include="*.py" --include="*.go" --include="*.ts" --include="*.md" --include="*.sh" | head -20
+grep -rn "manually\|manual step\|run this\|execute this\|remember to\|don't forget" --include="*.py" --include="*.go" --include="*.ts" --include="*.md" --include="*.sh" {{TARGET_DIR}} | head -20
 ```
 
 **Tribal knowledge indicators:**
@@ -168,13 +168,13 @@ grep -rn "manually\|manual step\|run this\|execute this\|remember to\|don't forg
 
 ```bash
 # Check API consistency
-grep -rn "status.*200\|status.*201\|status.*400\|status.*404\|status.*500" --include="*.py" --include="*.go" --include="*.ts" | head -30
+grep -rn "status.*200\|status.*201\|status.*400\|status.*404\|status.*500" --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}} | head -30
 
 # Check error response format consistency
-grep -rn "error.*message\|error.*code\|error.*detail" --include="*.py" --include="*.go" --include="*.ts" | head -20
+grep -rn "error.*message\|error.*code\|error.*detail" --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}} | head -20
 
 # Check pagination patterns
-grep -rn "page\|limit\|offset\|cursor\|next_token" --include="*.py" --include="*.go" --include="*.ts" | head -20
+grep -rn "page\|limit\|offset\|cursor\|next_token" --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}} | head -20
 ```
 
 **Consistency checks:**
@@ -209,7 +209,7 @@ Record work summary:
 ```bash
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --db-path {{OUTPUT_DIR}}/review.db \
-  --from-agent dogfood-tester --phase 7 \
+  --from-agent dogfood-tester --phase 7 --iteration M \
   --content "Dogfood testing complete. Tested X scenarios. Found Y issues: [summary]. Tribal knowledge items: Z. Rollback: [status]." \
   --metadata-json '{"scenarios_tested": X, "issues_found": Y, "tribal_knowledge_items": Z, "new_dev_setup_works": true, "rollback_validated": false, "dependency_failures_handled": false}'
 ```

@@ -246,7 +246,7 @@ Write the full architecture review to `{{OUTPUT_DIR}}/findings/architecture/arch
 ```bash
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --db-path {{OUTPUT_DIR}}/review.db \
-  --from-agent architecture-analyst --phase 2 --iteration N \
+  --from-agent architecture-analyst --phase 3 --iteration N \
   --message-type finding \
   --content "Architecture review complete. X findings: Y critical, Z high. Key concern: [summary]." \
   --metadata-json '{"total_findings": X, "critical": Y, "high": Z, "medium": W, "low": V, "god_classes": N, "circular_deps": M}'

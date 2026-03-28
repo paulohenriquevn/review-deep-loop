@@ -243,11 +243,10 @@ python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-finding \
     "title": "JWT signing secret is hardcoded and weak",
     "severity": "critical",
     "category": "security",
-    "phase_found": 6,
+    "phase": 6,
     "description": "The JWT signing secret is hardcoded in settings.py as a short string. This enables token forgery attacks.",
     "file_path": "src/config/settings.py",
-    "line_start": 42,
-    "line_end": 42,
+    "line_range": "42",
     "recommendation": "Move to environment variable, use cryptographically random secret (256+ bits), implement secret rotation."
   }'
 ```
@@ -257,7 +256,7 @@ Record work summary:
 ```bash
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --db-path {{OUTPUT_DIR}}/review.db \
-  --from-agent threat-modeler --phase 6 \
+  --from-agent threat-modeler --phase 6 --iteration M \
   --content "Threat modeling complete. Analyzed X flows. Identified Y threats (Z critical). Found W toxic combinations." \
   --metadata-json '{"flows_analyzed": X, "threats_total": Y, "threats_critical": Z, "toxic_combinations": W, "owasp_gaps": ["A01", "A03"]}'
 ```

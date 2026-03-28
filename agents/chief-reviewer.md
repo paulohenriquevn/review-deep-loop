@@ -49,6 +49,10 @@ python3 {{PLUGIN_ROOT}}/scripts/review_database.py query-findings --db-path {{OU
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py query-findings --db-path {{OUTPUT_DIR}}/review.db --category completeness
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py query-findings --db-path {{OUTPUT_DIR}}/review.db --category security
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py query-findings --db-path {{OUTPUT_DIR}}/review.db --category infrastructure
+python3 {{PLUGIN_ROOT}}/scripts/review_database.py query-findings --db-path {{OUTPUT_DIR}}/review.db --category data
+python3 {{PLUGIN_ROOT}}/scripts/review_database.py query-findings --db-path {{OUTPUT_DIR}}/review.db --category testing
+python3 {{PLUGIN_ROOT}}/scripts/review_database.py query-findings --db-path {{OUTPUT_DIR}}/review.db --category observability
+python3 {{PLUGIN_ROOT}}/scripts/review_database.py query-findings --db-path {{OUTPUT_DIR}}/review.db --category operational
 ```
 
 ### 3. Strategic Discussion & Decisions
@@ -73,7 +77,7 @@ python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --from-agent chief-reviewer --phase N --iteration M \
   --message-type meeting_minutes \
   --content "STRUCTURED_MINUTES" \
-  --metadata-json '{"attendees":["chief-reviewer","architecture-analyst","code-reviewer","completeness-auditor","security-auditor","infrastructure-reviewer","data-reviewer","cicd-reviewer"],"decisions":[...]}'
+  --metadata-json '{"attendees":["chief-reviewer","architecture-analyst","code-reviewer","completeness-auditor","security-auditor","infrastructure-reviewer","data-reviewer","cicd-reviewer","flow-tracer","observability-reviewer","test-auditor","threat-modeler","dogfood-tester","dependency-analyzer"],"decisions":[...]}'
 ```
 
 Also write meeting minutes to `{{OUTPUT_DIR}}/state/meetings/iteration_NNN.md`.
@@ -143,38 +147,38 @@ mkdir -p {{OUTPUT_DIR}}/state/meetings
 
 ## Phase-Specific Leadership
 
-### Phase 1 (Discovery & Mapping)
+### Phase 1 (Baseline — Discovery & Mapping)
 - Ensure the codebase is fully mapped: structure, languages, frameworks, entry points
 - Check: did we identify all critical paths and hot spots?
 - Push for understanding BEFORE judging — map first, review second
 
-### Phase 2 (Architecture Review)
+### Phase 2 (Completeness)
+- Ensure completeness auditor has covered: promises vs implemented, dead code, stubs, silent failures
+- Check: are promises in README/docs matched by actual implementation?
+- Push for a traceability matrix: docs → API → service → test
+
+### Phase 3 (Architecture Review)
 - Ensure the architecture analyst has covered: layers, dependencies, coupling, cohesion
 - Check: are we looking at the system as a whole, not just individual files?
 - Push for dependency graphs and import analysis
 
-### Phase 3 (Deep Code Review)
+### Phase 4 (Deep Code Review)
 - Ensure the code reviewer is systematic: checklist per method, not random reading
 - Check: are we covering critical paths (auth, payment, data mutation)?
 - Push for error handling and concurrency analysis
-
-### Phase 4 (Completeness & Security)
-- Ensure completeness auditor and security auditor work in parallel
-- Check: are promises in README/docs matched by actual implementation?
-- Push for OWASP Top 10 coverage and secrets scanning
 
 ### Phase 5 (Infrastructure & Data)
 - Ensure infrastructure, data, and CI/CD reviewers cover all deployment artifacts
 - Check: is what was tested the same as what gets deployed?
 - Push for backup strategy and rollback capability review
 
-### Phase 6 (Synthesis & Prioritization)
-- Synthesize ALL findings into a prioritized action plan
-- Check: are we giving actionable recommendations, not just complaints?
-- Push for severity calibration — is "critical" really critical?
+### Phase 6 (Security)
+- Ensure security auditor and threat modeler work in parallel
+- Push for OWASP Top 10 coverage, secrets scanning, and threat modeling per flow
+- Check: are toxic combinations identified?
 
 ### Phase 7 (Dogfooding & E2E Validation)
-- Apply the review findings to a real scenario
+- Apply the review findings to a real scenario via dogfood tester, test auditor, observability reviewer
 - Check: do the recommendations actually improve the codebase?
 - Push for validation that findings are reproducible and fixable
 
