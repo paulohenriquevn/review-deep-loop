@@ -248,30 +248,64 @@ def generate_c4_radar(scores, output_path):
     plt.close()
 
 def generate_risk_matrix(findings, output_path):
-    """Generate risk matrix heatmap."""
-    if not HAS_MATPLOTLIB:
-        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400">'
-        svg += '<text x="300" y="200" text-anchor="middle">Risk Matrix (install matplotlib)</text></svg>'
-        Path(output_path).write_text(svg)
-        return
-    # matplotlib implementation ...
+    """Generate risk matrix heatmap as SVG."""
+    # Count findings per severity-probability cell
+    severity_order = ['critical', 'high', 'medium', 'low']
+    probability_order = ['high', 'medium', 'low']
+    colors = {
+        ('critical','high'): '#d32f2f', ('critical','medium'): '#e53935', ('critical','low'): '#ef5350',
+        ('high','high'): '#e53935', ('high','medium'): '#ff9800', ('high','low'): '#ffa726',
+        ('medium','high'): '#ff9800', ('medium','medium'): '#ffc107', ('medium','low'): '#ffeb3b',
+        ('low','high'): '#ffa726', ('low','medium'): '#ffeb3b', ('low','low'): '#c8e6c9',
+    }
+    cell_w, cell_h = 120, 80
+    margin_l, margin_t = 100, 60
+    svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{margin_l + cell_w*4 + 20}" height="{margin_t + cell_h*3 + 60}">'
+    svg += '<text x="50%" y="30" text-anchor="middle" font-size="16" font-weight="bold">Risk Matrix</text>'
+    svg += f'<text x="{margin_l + cell_w*2}" y="{margin_t - 10}" text-anchor="middle" font-size="13">Severity</text>'
+    svg += f'<text x="{margin_l - 40}" y="{margin_t + cell_h*1.5}" text-anchor="middle" font-size="13" transform="rotate(-90,{margin_l - 40},{margin_t + cell_h*1.5})">Probability</text>'
+    for si, sev in enumerate(severity_order):
+        svg += f'<text x="{margin_l + si*cell_w + cell_w/2}" y="{margin_t - 2}" text-anchor="middle" font-size="12">{sev.title()}</text>'
+    for pi, prob in enumerate(probability_order):
+        svg += f'<text x="{margin_l - 8}" y="{margin_t + pi*cell_h + cell_h/2 + 4}" text-anchor="end" font-size="12">{prob.title()}</text>'
+        for si, sev in enumerate(severity_order):
+            count = sum(1 for f in findings if f.get('severity') == sev)
+            color = colors.get((sev, prob), '#eee')
+            x, y = margin_l + si*cell_w, margin_t + pi*cell_h
+            svg += f'<rect x="{x}" y="{y}" width="{cell_w}" height="{cell_h}" fill="{color}" stroke="#fff" stroke-width="2"/>'
+            if count > 0:
+                svg += f'<text x="{x+cell_w/2}" y="{y+cell_h/2+5}" text-anchor="middle" font-size="14" font-weight="bold">{count}</text>'
+    svg += '</svg>'
+    Path(output_path).write_text(svg)
 
 def generate_radar_svg(labels, values):
     """Pure SVG radar chart fallback (no matplotlib needed)."""
-    cx, cy, r = 200, 200, 150
+    cx, cy, r = 200, 220, 150
     n = len(labels)
-    svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="400" height="420">'
-    svg += f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="#ddd"/>'
+    w, h = 460, 480
+    svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}">'
+    svg += f'<text x="{w/2}" y="24" text-anchor="middle" font-size="16" font-weight="bold">C4 Health Assessment</text>'
+    # Draw grid circles
+    for level in [0.25, 0.5, 0.75, 1.0]:
+        svg += f'<circle cx="{cx}" cy="{cy}" r="{r*level}" fill="none" stroke="#ddd" stroke-dasharray="4,4"/>'
+    # Draw axes and labels
     points = []
     for i, (label, val) in enumerate(zip(labels, values)):
         angle = -math.pi/2 + 2*math.pi*i/n
+        ax = cx + r * math.cos(angle)
+        ay = cy + r * math.sin(angle)
+        svg += f'<line x1="{cx}" y1="{cy}" x2="{ax}" y2="{ay}" stroke="#ccc"/>'
         x = cx + r * val * math.cos(angle)
         y = cy + r * val * math.sin(angle)
-        lx = cx + (r+30) * math.cos(angle)
-        ly = cy + (r+30) * math.sin(angle)
-        points.append(f'{x},{y}')
-        svg += f'<text x="{lx}" y="{ly}" text-anchor="middle" font-size="12">{label}: {val:.1f}</text>'
-    svg += f'<polygon points="{" ".join(points)}" fill="rgba(0,100,200,0.3)" stroke="blue"/>'
+        lx = cx + (r+40) * math.cos(angle)
+        ly = cy + (r+40) * math.sin(angle)
+        points.append(f'{x:.1f},{y:.1f}')
+        anchor = "middle"
+        if math.cos(angle) > 0.3: anchor = "start"
+        elif math.cos(angle) < -0.3: anchor = "end"
+        svg += f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" font-size="12">{label}: {val:.2f}</text>'
+        svg += f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="#1565c0"/>'
+    svg += f'<polygon points="{" ".join(points)}" fill="rgba(21,101,192,0.25)" stroke="#1565c0" stroke-width="2"/>'
     svg += '</svg>'
     return svg
 
@@ -315,7 +349,8 @@ python3 {{PLUGIN_ROOT}}/scripts/review_database.py query-components --db-path {{
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py query-flows --db-path {{OUTPUT_DIR}}/review.db
 
 # Quality scores
-python3 {{PLUGIN_ROOT}}/scripts/review_database.py query-messages --db-path {{OUTPUT_DIR}}/review.db --phase 0
+# Quality scores (query from quality_scores table via stats)
+python3 {{PLUGIN_ROOT}}/scripts/review_database.py stats --db-path {{OUTPUT_DIR}}/review.db
 
 # Phase outputs
 cat {{OUTPUT_DIR}}/baseline/flow_diagrams.md 2>/dev/null
@@ -360,7 +395,7 @@ Controlavel = 1.0 - (weighted_penalty from infrastructure + operational findings
 ```bash
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --db-path {{OUTPUT_DIR}}/review.db \
-  --from-agent report-writer --phase 8 \
+  --from-agent report-writer --phase 8 --iteration M \
   --content "Final report written. Total findings: N. C4 scores: Correto=X, Completo=Y, Confiavel=Z, Controlavel=W. P1 items: A. Figures generated: B." \
   --metadata-json '{"report_path": "final_report.md", "total_findings": N, "c4_scores": {"correto": X, "completo": Y, "confiavel": Z, "controlavel": W}, "p1_count": A, "p2_count": B, "figures_generated": C}'
 ```

@@ -30,16 +30,16 @@ Search for logging patterns in the codebase:
 
 ```bash
 # Find logging usage
-grep -rn "log\.\|logger\.\|logging\.\|slog\.\|console\.log\|print(" --include="*.py" --include="*.go" --include="*.ts" --include="*.java" | head -50
+grep -rn "log\.\|logger\.\|logging\.\|slog\.\|console\.log\|print(" --include="*.py" --include="*.go" --include="*.ts" --include="*.java" {{TARGET_DIR}} | head -50
 
 # Check for structured logging (JSON, key-value pairs)
-grep -rn "structlog\|json_logger\|slog\.\|winston\|pino\|zap\.\|logrus\." --include="*.py" --include="*.go" --include="*.ts" --include="*.java" -l
+grep -rn "structlog\|json_logger\|slog\.\|winston\|pino\|zap\.\|logrus\." --include="*.py" --include="*.go" --include="*.ts" --include="*.java" -l {{TARGET_DIR}}
 
 # Find printf-style logging (anti-pattern)
-grep -rn "print(\|fmt\.Print\|console\.log\|System\.out" --include="*.py" --include="*.go" --include="*.ts" --include="*.java" | head -30
+grep -rn "print(\|fmt\.Print\|console\.log\|System\.out" --include="*.py" --include="*.go" --include="*.ts" --include="*.java" {{TARGET_DIR}} | head -30
 
 # Check log levels usage
-grep -rn "\.debug\|\.info\|\.warn\|\.error\|\.critical\|\.fatal" --include="*.py" --include="*.go" --include="*.ts" | head -30
+grep -rn "\.debug\|\.info\|\.warn\|\.error\|\.critical\|\.fatal" --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}} | head -30
 ```
 
 **Evaluation criteria:**
@@ -56,13 +56,13 @@ grep -rn "\.debug\|\.info\|\.warn\|\.error\|\.critical\|\.fatal" --include="*.py
 
 ```bash
 # Find trace/correlation ID patterns
-grep -rn "trace_id\|correlation_id\|request_id\|x-request-id\|X-Trace-Id\|span_id" --include="*.py" --include="*.go" --include="*.ts" --include="*.java" --include="*.yaml" --include="*.yml"
+grep -rn "trace_id\|correlation_id\|request_id\|x-request-id\|X-Trace-Id\|span_id" --include="*.py" --include="*.go" --include="*.ts" --include="*.java" --include="*.yaml" --include="*.yml" {{TARGET_DIR}}
 
 # Check middleware/interceptors that propagate IDs
-grep -rn "middleware\|interceptor\|filter" --include="*.py" --include="*.go" --include="*.ts" -l
+grep -rn "middleware\|interceptor\|filter" --include="*.py" --include="*.go" --include="*.ts" -l {{TARGET_DIR}}
 
 # OpenTelemetry / tracing libraries
-grep -rn "opentelemetry\|jaeger\|zipkin\|datadog\|newrelic\|otel" --include="*.py" --include="*.go" --include="*.ts" --include="*.yaml" -l
+grep -rn "opentelemetry\|jaeger\|zipkin\|datadog\|newrelic\|otel" --include="*.py" --include="*.go" --include="*.ts" --include="*.yaml" -l {{TARGET_DIR}}
 ```
 
 **Key questions:**
@@ -76,13 +76,13 @@ grep -rn "opentelemetry\|jaeger\|zipkin\|datadog\|newrelic\|otel" --include="*.p
 
 ```bash
 # Find metrics instrumentation
-grep -rn "counter\|gauge\|histogram\|summary\|prometheus\|statsd\|metrics\." --include="*.py" --include="*.go" --include="*.ts" --include="*.java" -l
+grep -rn "counter\|gauge\|histogram\|summary\|prometheus\|statsd\|metrics\." --include="*.py" --include="*.go" --include="*.ts" --include="*.java" -l {{TARGET_DIR}}
 
 # Check what is being measured
-grep -rn "\.inc\|\.observe\|\.set\|\.record\|metric_name\|labels=" --include="*.py" --include="*.go" --include="*.ts" | head -30
+grep -rn "\.inc\|\.observe\|\.set\|\.record\|metric_name\|labels=" --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}} | head -30
 
 # Business metrics vs infrastructure metrics
-grep -rn "order\|payment\|user\|transaction\|revenue\|conversion" --include="*.py" --include="*.go" --include="*.ts" | grep -i "metric\|counter\|gauge" | head -20
+grep -rn "order\|payment\|user\|transaction\|revenue\|conversion" --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}} | grep -i "metric\|counter\|gauge" | head -20
 ```
 
 **Evaluation criteria:**
@@ -99,13 +99,13 @@ Missing business metrics is a critical finding — you cannot run a business on 
 
 ```bash
 # Find alerting rules
-find . -type f \( -name "*.rules" -o -name "*.rules.yml" -o -name "*alert*" -o -name "*alarm*" \) | head -20
+find {{TARGET_DIR}} -type f \( -name "*.rules" -o -name "*.rules.yml" -o -name "*alert*" -o -name "*alarm*" \) | head -20
 
 # Check alert definitions
-grep -rn "alert:\|alarm\|threshold\|pagerduty\|opsgenie\|slack.*webhook" --include="*.yaml" --include="*.yml" --include="*.json" --include="*.tf" | head -30
+grep -rn "alert:\|alarm\|threshold\|pagerduty\|opsgenie\|slack.*webhook" --include="*.yaml" --include="*.yml" --include="*.json" --include="*.tf" {{TARGET_DIR}} | head -30
 
 # Check for SLOs/SLIs
-grep -rn "slo\|sli\|error_budget\|availability\|latency_target" --include="*.yaml" --include="*.yml" --include="*.py" --include="*.go" | head -20
+grep -rn "slo\|sli\|error_budget\|availability\|latency_target" --include="*.yaml" --include="*.yml" --include="*.py" --include="*.go" {{TARGET_DIR}} | head -20
 ```
 
 **Evaluate against these anti-patterns:**
@@ -120,20 +120,20 @@ grep -rn "slo\|sli\|error_budget\|availability\|latency_target" --include="*.yam
 
 ```bash
 # Find dashboard definitions
-find . -type f \( -name "*dashboard*" -o -name "*grafana*" -o -name "*panel*" \) | head -20
+find {{TARGET_DIR}} -type f \( -name "*dashboard*" -o -name "*grafana*" -o -name "*panel*" \) | head -20
 
 # Check for dashboard-as-code
-grep -rn "dashboard\|panel\|grafana\|datadog" --include="*.json" --include="*.yaml" --include="*.tf" -l
+grep -rn "dashboard\|panel\|grafana\|datadog" --include="*.json" --include="*.yaml" --include="*.tf" -l {{TARGET_DIR}}
 ```
 
 ### 6. Runbooks
 
 ```bash
 # Find runbooks or operational documentation
-find . -type f \( -name "*runbook*" -o -name "*playbook*" -o -name "*incident*" -o -name "*operations*" -o -name "*troubleshoot*" \) | head -20
+find {{TARGET_DIR}} -type f \( -name "*runbook*" -o -name "*playbook*" -o -name "*incident*" -o -name "*operations*" -o -name "*troubleshoot*" \) | head -20
 
 # Check README for operational sections
-grep -rn "troubleshoot\|incident\|on-call\|runbook\|recovery\|rollback" --include="*.md" | head -20
+grep -rn "troubleshoot\|incident\|on-call\|runbook\|recovery\|rollback" --include="*.md" {{TARGET_DIR}} | head -20
 ```
 
 ### 7. Error Differentiation
@@ -146,10 +146,10 @@ Can the observability stack differentiate between:
 
 ```bash
 # Check error classification
-grep -rn "error_type\|error_class\|error_source\|dependency_error\|infra_error\|app_error" --include="*.py" --include="*.go" --include="*.ts" | head -20
+grep -rn "error_type\|error_class\|error_source\|dependency_error\|infra_error\|app_error" --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}} | head -20
 
 # Check health checks
-grep -rn "health\|readiness\|liveness\|ready\|alive\|ping" --include="*.py" --include="*.go" --include="*.ts" --include="*.yaml" -l
+grep -rn "health\|readiness\|liveness\|ready\|alive\|ping" --include="*.py" --include="*.go" --include="*.ts" --include="*.yaml" -l {{TARGET_DIR}}
 ```
 
 ## Scoring Guide
@@ -188,7 +188,7 @@ Record your work summary:
 ```bash
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --db-path {{OUTPUT_DIR}}/review.db \
-  --from-agent observability-reviewer --phase 7 \
+  --from-agent observability-reviewer --phase 7 --iteration M \
   --content "Observability review complete. Score: X/1.0. Critical gaps: [list]. Strengths: [list]." \
   --metadata-json '{"overall_score": 0.XX, "structured_logging": true, "request_correlation": false, "business_metrics": false, "alerting_defined": true, "dashboards": false, "runbooks": false}'
 ```

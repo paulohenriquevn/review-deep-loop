@@ -28,16 +28,16 @@ You are the **Test Auditor** — the research team's quality assurance expert. Y
 
 ```bash
 # Find all test files
-find . -type f \( -name "*test*" -o -name "*spec*" \) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/vendor/*" | head -50
+find {{TARGET_DIR}} -type f \( -name "*test*" -o -name "*spec*" \) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/vendor/*" | head -50
 
 # Count test types
-echo "=== Unit tests ===" && find . -type f \( -name "*test*" -o -name "*spec*" \) ! -path "*/integration/*" ! -path "*/e2e/*" ! -path "*/node_modules/*" ! -path "*/.git/*" | wc -l
-echo "=== Integration tests ===" && find . -type f -path "*/integration/*" \( -name "*test*" -o -name "*spec*" \) | wc -l
-echo "=== E2E tests ===" && find . -type f -path "*/e2e/*" \( -name "*test*" -o -name "*spec*" \) | wc -l
+echo "=== Unit tests ===" && find {{TARGET_DIR}} -type f \( -name "*test*" -o -name "*spec*" \) ! -path "*/integration/*" ! -path "*/e2e/*" ! -path "*/node_modules/*" ! -path "*/.git/*" | wc -l
+echo "=== Integration tests ===" && find {{TARGET_DIR}} -type f -path "*/integration/*" \( -name "*test*" -o -name "*spec*" \) | wc -l
+echo "=== E2E tests ===" && find {{TARGET_DIR}} -type f -path "*/e2e/*" \( -name "*test*" -o -name "*spec*" \) | wc -l
 
 # Ratio of test code to production code
-echo "=== Production code ===" && find . -type f \( -name "*.py" -o -name "*.go" -o -name "*.ts" -o -name "*.java" \) ! -name "*test*" ! -name "*spec*" ! -path "*/test/*" ! -path "*/node_modules/*" ! -path "*/.git/*" -exec wc -l {} + | tail -1
-echo "=== Test code ===" && find . -type f \( -name "*test*" -o -name "*spec*" \) ! -path "*/node_modules/*" ! -path "*/.git/*" -exec wc -l {} + | tail -1
+echo "=== Production code ===" && find {{TARGET_DIR}} -type f \( -name "*.py" -o -name "*.go" -o -name "*.ts" -o -name "*.java" \) ! -name "*test*" ! -name "*spec*" ! -path "*/test/*" ! -path "*/node_modules/*" ! -path "*/.git/*" -exec wc -l {} + | tail -1
+echo "=== Test code ===" && find {{TARGET_DIR}} -type f \( -name "*test*" -o -name "*spec*" \) ! -path "*/node_modules/*" ! -path "*/.git/*" -exec wc -l {} + | tail -1
 ```
 
 **Ideal pyramid:**
@@ -47,7 +47,7 @@ echo "=== Test code ===" && find . -type f \( -name "*test*" -o -name "*spec*" \
        /----------\
       / Integration \     ← 20-30% of tests
      /--------------\
-    /   Unitários    \   ← 60-70% of tests
+    /     Unit        \   ← 60-70% of tests
    /------------------\
 ```
 
@@ -108,7 +108,7 @@ grep -rn "empty\|zero\|null\|none\|negative\|overflow\|max\|min\|boundary" --inc
 
 ```bash
 # Check CI history for flaky tests (if CI config exists)
-find . -type f \( -name "*.yml" -o -name "*.yaml" \) -path "*ci*" -o -path "*github*" | head -10
+find {{TARGET_DIR}} -type f \( -name "*.yml" -o -name "*.yaml" \) -path "*ci*" -o -path "*github*" | head -10
 
 # Look for retry/sleep patterns in tests (flakiness indicators)
 grep -rn "sleep\|time\.sleep\|setTimeout\|retry\|flaky\|skip\|xfail\|pending" --include="*test*" --include="*spec*" | head -20
@@ -179,12 +179,12 @@ grep -rn "# Arrange\|# Act\|# Assert\|# Given\|# When\|# Then\|// Arrange\|// Ac
 # Check test naming quality
 grep -rn "def test_\|func Test\|it(\|describe(\|test(" --include="*test*" --include="*spec*" | head -30
 
-# Look for tests with multiple assertions on different behaviors
-# (potential SRP violation in tests)
-grep -rn "assert.*\n.*assert.*\n.*assert.*\n.*assert.*\n.*assert" --include="*test*" --include="*spec*" | head -10
+# Look for tests with excessive assertions (potential SRP violation)
+# Count assertions per test file — files with >20 assertions may have tests doing too much
+grep -c "assert\|expect\|should\|Assert\." --include="*test*" --include="*spec*" -r {{TARGET_DIR}} 2>/dev/null | sort -t: -k2 -rn | head -10
 
 # Check for test fixtures and factories
-find . -type f \( -name "conftest*" -o -name "fixture*" -o -name "factory*" -o -name "builder*" -o -name "helper*" \) -path "*/test*" | head -20
+find {{TARGET_DIR}} -type f \( -name "conftest*" -o -name "fixture*" -o -name "factory*" -o -name "builder*" -o -name "helper*" \) -path "*/test*" | head -20
 ```
 
 ## Scoring Guide
@@ -223,7 +223,7 @@ Record your work summary:
 ```bash
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --db-path {{OUTPUT_DIR}}/review.db \
-  --from-agent test-auditor --phase 7 \
+  --from-agent test-auditor --phase 7 --iteration M \
   --content "Test audit complete. Pyramid: [shape]. Critical path coverage: X%. Failure path coverage: Y%. Flaky tests: N. Mock quality: [assessment]." \
   --metadata-json '{"test_count": {"unit": X, "integration": Y, "e2e": Z}, "critical_paths_covered": N, "critical_paths_total": M, "failure_paths_tested": P, "flaky_tests": Q, "skipped_tests": R}'
 ```

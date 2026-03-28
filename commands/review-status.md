@@ -1,6 +1,6 @@
 ---
 description: "View current deep review loop status"
-allowed-tools: ["Bash(test -f .claude/review-loop.local.md:*)", "Read(.claude/review-loop.local.md)", "Bash(ls:*)", "Bash(wc:*)", "Bash(cat:*)"]
+allowed-tools: ["Bash(test -f .claude/review-loop.local.md:*)", "Read(.claude/review-loop.local.md)", "Bash(ls:*)", "Bash(wc:*)", "Bash(cat:*)", "Bash(python3:*)"]
 hide-from-slash-command-tool: "true"
 ---
 
@@ -15,6 +15,10 @@ Check and display the current deep review loop status:
 3. **If EXISTS**:
    - Read `.claude/review-loop.local.md` to get all state fields
    - Check the output directory for generated files
+   - **Query the database** for authoritative finding counts (state file counters may lag):
+     ```bash
+     python3 <PLUGIN_ROOT>/scripts/review_database.py stats --db-path <OUTPUT_DIR>/review.db
+     ```
    - Display a formatted status report:
 
 ```
@@ -28,12 +32,14 @@ Phase iteration:  [phase_iteration]
 Global iteration: [global_iteration]/[max_global_iterations]
 Started:          [started_at]
 
-Metrics:
-  Components mapped:  [components_mapped]
-  Flows mapped:       [flows_mapped]
-  Findings total:     [findings_total]
-  Findings critical:  [findings_critical]
-  Findings high:      [findings_high]
+Metrics (from database):
+  Components mapped:  [components from DB stats]
+  Flows mapped:       [flows from DB stats]
+  Findings total:     [findings from DB stats]
+  Findings by severity: critical=[N] high=[N] medium=[N] low=[N]
+  Threat models:      [threat_models from DB stats]
+  Evidence records:   [evidence from DB stats]
+  Quality scores:     [quality_scores from DB stats]
 
 Review cycles: [review_cycles]/[max_review_cycles]
 
@@ -48,7 +54,4 @@ Output directory: [output_dir]
   analysis/threat_models/ [N files]
   figures/               [N files]
   review.db:             [exists/missing]
-
-Quality gate history:
-  [List QUALITY_SCORE and QUALITY_PASSED from state file]
 ```

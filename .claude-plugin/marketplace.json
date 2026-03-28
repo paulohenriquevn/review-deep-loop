@@ -1,0 +1,26 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "review-deep-loop",
+  "version": "1.0.0",
+  "description": "Autonomous deep software review laboratory — systematically audits architecture, completeness, code quality, infrastructure, security, and operational readiness. Powered by 16 specialized AI agents with an 8-phase pipeline.",
+  "owner": {
+    "name": "paulohenriquevn",
+    "email": "paulohenriquevn@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "review-deep-loop",
+      "description": "Autonomous deep review pipeline with 8-phase audit, 16 specialized agents, quality gates, hard blocks, C4 framework scoring, and loop-back mechanism for re-review cycles. Point it at a codebase, walk away, come back to a comprehensive findings report with threat models and remediation plan.",
+      "source": {
+        "source": "github",
+        "repo": "paulohenriquevn/review-deep-loop"
+      },
+      "version": "1.0.0",
+      "author": {
+        "name": "Paulo (gmail)",
+        "email": "paulohenriquevn@gmail.com"
+      },
+      "category": "review"
+    }
+  ]
+}

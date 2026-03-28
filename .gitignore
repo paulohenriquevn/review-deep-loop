@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.egg-info/
+dist/
+build/
+
+# Review output (generated at runtime, not committed)
+review-output/
+*.db
+
+# Claude Code state
+.claude/review-loop.local.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Environment
+.env
+.venv/
+venv/
+
+# Pytest
+.pytest_cache/

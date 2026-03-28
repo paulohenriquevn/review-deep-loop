@@ -271,7 +271,7 @@ Write the full security audit to `{{OUTPUT_DIR}}/findings/security/security_revi
 ```bash
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --db-path {{OUTPUT_DIR}}/review.db \
-  --from-agent security-auditor --phase 4 --iteration N \
+  --from-agent security-auditor --phase 6 --iteration N \
   --message-type finding \
   --content "Security audit complete. X findings: Y critical, Z high. OWASP coverage: 10/10 categories reviewed. Key concern: [summary]." \
   --metadata-json '{"total_findings": X, "critical": Y, "high": Z, "medium": W, "low": V, "secrets_found": S, "owasp_categories_reviewed": 10}'

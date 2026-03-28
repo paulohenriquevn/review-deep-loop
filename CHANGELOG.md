@@ -22,3 +22,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Quality gate rubrics per phase with automatic fail conditions
 - Hard blocks enforcing evidence requirements before phase advancement
 - Test coverage: database operations, enum validation, stop hook logic, setup script
+- Plugin configuration files (.claude-plugin/plugin.json, marketplace.json) for marketplace publishing
+- .gitignore for Python artifacts, runtime output, and editor files

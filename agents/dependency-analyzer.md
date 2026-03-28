@@ -28,16 +28,16 @@ You are the **Dependency Analyzer** — the research team's supply chain expert.
 
 ```bash
 # Python imports
-grep -rn "^from \|^import " --include="*.py" ! -path "*/test*" ! -path "*/.git/*" ! -path "*/node_modules/*" ! -path "*/venv/*" ! -path "*/__pycache__/*" | head -60
+grep -rn "^from \|^import " --include="*.py" --exclude-dir=test --exclude-dir=tests --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=venv --exclude-dir=__pycache__ {{TARGET_DIR}} | head -60
 
 # Go imports
-grep -rn "import (" --include="*.go" ! -path "*/vendor/*" ! -path "*/.git/*" -A 10 | head -60
+grep -rn "import (" --include="*.go" --exclude-dir=vendor --exclude-dir=.git {{TARGET_DIR}} -A 10 | head -60
 
 # TypeScript/JavaScript imports
-grep -rn "^import \|require(" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" ! -path "*/node_modules/*" ! -path "*/.git/*" | head -60
+grep -rn "^import \|require(" --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" --exclude-dir=node_modules --exclude-dir=.git {{TARGET_DIR}} | head -60
 
 # Java imports
-grep -rn "^import " --include="*.java" ! -path "*/.git/*" | head -60
+grep -rn "^import " --include="*.java" --exclude-dir=.git {{TARGET_DIR}} | head -60
 ```
 
 Build a dependency graph text representation:
@@ -54,7 +54,7 @@ module_d → module_a  ← CIRCULAR!
 ```bash
 # Python: analyze import relationships
 # For each Python module, list its internal imports
-find . -type f -name "*.py" ! -name "*test*" ! -path "*/test/*" ! -path "*/.git/*" ! -path "*/venv/*" ! -path "*/__pycache__/*" -exec grep -l "^from \.\|^from src\|^from app" {} \; | head -30
+find {{TARGET_DIR}} -type f -name "*.py" ! -name "*test*" ! -path "*/test/*" ! -path "*/.git/*" ! -path "*/venv/*" ! -path "*/__pycache__/*" -exec grep -l "^from \.\|^from src\|^from app" {} \; | head -30
 
 # Check for mutual imports (A imports B, B imports A)
 # This requires tracing import chains — look for patterns like:
@@ -71,42 +71,42 @@ find . -type f -name "*.py" ! -name "*test*" ! -path "*/test/*" ! -path "*/.git/
 
 ```bash
 # Find lazy imports (potential circular dependency workarounds)
-grep -rn "def.*:.*\n.*import\|if TYPE_CHECKING\|typing.TYPE_CHECKING" --include="*.py" | head -20
+grep -rn "if TYPE_CHECKING\|typing.TYPE_CHECKING" --include="*.py" {{TARGET_DIR}} | head -20
 ```
 
 ### 3. External Dependency Inventory
 
 ```bash
 # Python dependencies
-cat requirements.txt setup.cfg pyproject.toml setup.py 2>/dev/null | head -80
+cat {{TARGET_DIR}}/requirements.txt {{TARGET_DIR}}/setup.cfg {{TARGET_DIR}}/pyproject.toml {{TARGET_DIR}}/setup.py 2>/dev/null | head -80
 
 # Node.js dependencies
-cat package.json 2>/dev/null | head -60
+cat {{TARGET_DIR}}/package.json 2>/dev/null | head -60
 
 # Go dependencies
-cat go.mod go.sum 2>/dev/null | head -60
+cat {{TARGET_DIR}}/go.mod {{TARGET_DIR}}/go.sum 2>/dev/null | head -60
 
 # Rust dependencies
-cat Cargo.toml Cargo.lock 2>/dev/null | head -60
+cat {{TARGET_DIR}}/Cargo.toml {{TARGET_DIR}}/Cargo.lock 2>/dev/null | head -60
 
 # Java/Kotlin dependencies
-cat build.gradle pom.xml build.gradle.kts 2>/dev/null | head -60
+cat {{TARGET_DIR}}/build.gradle {{TARGET_DIR}}/pom.xml {{TARGET_DIR}}/build.gradle.kts 2>/dev/null | head -60
 
 # Docker base images
-grep -rn "^FROM " --include="Dockerfile*" | head -10
+grep -rn "^FROM " --include="Dockerfile*" {{TARGET_DIR}} | head -10
 ```
 
 ### 4. Version Pinning Analysis
 
 ```bash
 # Check for unpinned dependencies (Python)
-grep -E "^[a-zA-Z]" requirements.txt 2>/dev/null | grep -v "==" | head -20
+grep -E "^[a-zA-Z]" {{TARGET_DIR}}/requirements.txt 2>/dev/null | grep -v "==" | head -20
 
 # Check for wildcard versions (Node.js)
-grep -E "\"\\*\"|\"latest\"|\"\\^|\"~" package.json 2>/dev/null | head -20
+grep -E "\"\\*\"|\"latest\"|\"\\^|\"~" {{TARGET_DIR}}/package.json 2>/dev/null | head -20
 
 # Check for lock files
-ls -la requirements.txt poetry.lock Pipfile.lock package-lock.json yarn.lock pnpm-lock.yaml go.sum Cargo.lock 2>/dev/null
+ls -la {{TARGET_DIR}}/requirements.txt {{TARGET_DIR}}/poetry.lock {{TARGET_DIR}}/Pipfile.lock {{TARGET_DIR}}/package-lock.json {{TARGET_DIR}}/yarn.lock {{TARGET_DIR}}/pnpm-lock.yaml {{TARGET_DIR}}/go.sum {{TARGET_DIR}}/Cargo.lock 2>/dev/null
 ```
 
 **Version pinning assessment:**
@@ -198,10 +198,10 @@ pip show <package> 2>/dev/null | grep -E "Version|Home-page"
 find . -type d \( -name "vendor" -o -name "vendored" -o -name "third_party" -o -name "lib" -o -name "extern" \) ! -path "*/.git/*" ! -path "*/node_modules/*" | head -10
 
 # Find copied code (files with external copyright notices)
-grep -rn "Copyright.*[0-9]\{4\}\|Licensed under\|Permission is hereby granted" --include="*.py" --include="*.go" --include="*.ts" --include="*.java" ! -path "*/node_modules/*" ! -path "*/vendor/*" ! -path "*/.git/*" | head -20
+grep -rn "Copyright.*[0-9]\{4\}\|Licensed under\|Permission is hereby granted" --include="*.py" --include="*.go" --include="*.ts" --include="*.java" --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=.git {{TARGET_DIR}} | head -20
 
 # Check for code that looks copy-pasted from Stack Overflow or other sources
-grep -rn "stackoverflow\|github\.com/\|adapted from\|based on\|copied from\|ported from" --include="*.py" --include="*.go" --include="*.ts" | head -10
+grep -rn "stackoverflow\|github\.com/\|adapted from\|based on\|copied from\|ported from" --include="*.py" --include="*.go" --include="*.ts" {{TARGET_DIR}} | head -10
 ```
 
 ## Output Format
@@ -290,7 +290,7 @@ Record work summary:
 ```bash
 python3 {{PLUGIN_ROOT}}/scripts/review_database.py add-message \
   --db-path {{OUTPUT_DIR}}/review.db \
-  --from-agent dependency-analyzer --phase 3 \
+  --from-agent dependency-analyzer --phase 3 --iteration M \
   --content "Dependency analysis complete. Internal modules: X. External deps: Y. Circular deps: Z. Vulnerabilities: W. License issues: V." \
   --metadata-json '{"internal_modules": X, "external_deps": Y, "circular_deps": Z, "vulnerabilities": {"critical": A, "high": B, "medium": C}, "license_issues": V, "unpinned_deps": U}'
 ```
