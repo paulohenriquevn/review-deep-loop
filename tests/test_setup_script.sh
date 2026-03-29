@@ -159,6 +159,62 @@ OUTPUT=$(bash "$SETUP_SCRIPT" "/nonexistent/path/to/project" 2>&1 || true)
 assert_contains "error for missing target" "Error: Target path does not exist" "$OUTPUT"
 
 # ---------------------------------------------------------------------------
+# Test 10: --scope is included in state file
+# ---------------------------------------------------------------------------
+echo ""
+echo "Test 10: --scope is included in state file"
+rm -f "$WORK_DIR/.claude/review-loop.local.md"
+rm -rf "$WORK_DIR/scope-output"
+bash "$SETUP_SCRIPT" "$TARGET_DIR" --scope "login and authentication" --output-dir "$WORK_DIR/scope-output" > /dev/null 2>&1 || true
+STATE_CONTENT=$(cat "$WORK_DIR/.claude/review-loop.local.md")
+assert_contains "scope in state file" 'scope: "login and authentication"' "$STATE_CONTENT"
+
+# ---------------------------------------------------------------------------
+# Test 11: --scope without value is rejected
+# ---------------------------------------------------------------------------
+echo ""
+echo "Test 11: --scope without value is rejected"
+OUTPUT=$(bash "$SETUP_SCRIPT" "$TARGET_DIR" --scope 2>&1 || true)
+assert_contains "error for empty scope" "Error: --scope requires" "$OUTPUT"
+
+# ---------------------------------------------------------------------------
+# Test 12: --scope injects scoped review section into prompt
+# ---------------------------------------------------------------------------
+echo ""
+echo "Test 12: --scope injects scoped review instructions"
+STATE_CONTENT=$(cat "$WORK_DIR/.claude/review-loop.local.md")
+assert_contains "scope section present" "SCOPED REVIEW" "$STATE_CONTENT"
+assert_contains "scope value in prompt" "login and authentication" "$STATE_CONTENT"
+
+# ---------------------------------------------------------------------------
+# Test 13: No --scope means empty scope and no scoped section
+# ---------------------------------------------------------------------------
+echo ""
+echo "Test 13: No --scope means no scoped section"
+rm -f "$WORK_DIR/.claude/review-loop.local.md"
+rm -rf "$WORK_DIR/noscope-output"
+bash "$SETUP_SCRIPT" "$TARGET_DIR" --output-dir "$WORK_DIR/noscope-output" > /dev/null 2>&1 || true
+STATE_CONTENT=$(cat "$WORK_DIR/.claude/review-loop.local.md")
+assert_contains "empty scope" 'scope: ""' "$STATE_CONTENT"
+if echo "$STATE_CONTENT" | grep -q "SCOPED REVIEW"; then
+  echo "  FAIL: scoped section should not be present without --scope"
+  FAIL=$((FAIL + 1))
+else
+  echo "  PASS: no scoped section without --scope"
+  PASS=$((PASS + 1))
+fi
+
+# ---------------------------------------------------------------------------
+# Test 14: --scope appears in setup output message
+# ---------------------------------------------------------------------------
+echo ""
+echo "Test 14: --scope appears in setup output"
+rm -f "$WORK_DIR/.claude/review-loop.local.md"
+rm -rf "$WORK_DIR/scope-msg-output"
+OUTPUT=$(bash "$SETUP_SCRIPT" "$TARGET_DIR" --scope "payment module" --output-dir "$WORK_DIR/scope-msg-output" 2>&1 || true)
+assert_contains "scope in output" "Scope: payment module" "$OUTPUT"
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo ""

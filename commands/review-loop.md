@@ -1,6 +1,6 @@
 ---
 description: "Start autonomous deep review loop"
-argument-hint: "TARGET [--mode full|quick|security|architecture] [--max-iterations N] [--output-dir PATH] [--severity-threshold critical|high|medium|low]"
+argument-hint: "TARGET [--scope DESCRIPTION] [--mode full|quick|security|architecture] [--max-iterations N] [--output-dir PATH] [--severity-threshold critical|high|medium|low]"
 allowed-tools: ["Bash(${CLAUDE_PLUGIN_ROOT}/scripts/setup-review-loop.sh:*)", "Bash(${CLAUDE_PLUGIN_ROOT}/scripts/review_database.py:*)"]
 hide-from-slash-command-tool: "true"
 ---

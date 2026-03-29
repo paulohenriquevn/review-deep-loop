@@ -25,6 +25,7 @@ Check and display the current deep review loop status:
 Deep Review Loop Status
 =======================
 Target:           [target]
+Scope:            [scope or "entire codebase"]
 Mode:             [mode]
 Severity threshold: [severity_threshold]
 Phase:            [N]/8 -- [phase_name]

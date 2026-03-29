@@ -61,6 +61,7 @@ GLOBAL_ITERATION=$(parse_field "global_iteration")
 MAX_GLOBAL_ITERATIONS=$(parse_field "max_global_iterations")
 COMPLETION_PROMISE=$(parse_field "completion_promise")
 TARGET=$(parse_field "target")
+SCOPE=$(parse_field "scope")
 OUTPUT_DIR=$(parse_field "output_dir")
 MODE=$(parse_field "mode")
 SEVERITY_THRESHOLD=$(parse_field "severity_threshold")
@@ -471,6 +472,7 @@ cat > "$TEMP_FILE" <<EOF
 ---
 active: true
 target: "$TARGET"
+scope: "$SCOPE"
 current_phase: $CURRENT_PHASE
 phase_name: "$PHASE_NAME"
 phase_iteration: $NEXT_PHASE_ITER
@@ -501,6 +503,9 @@ PHASE_MAX_FOR_CURRENT=${PHASE_MAX_ITER[$CURRENT_PHASE]:-3}
 
 SYSTEM_MSG="🔍 Review Loop | Phase $CURRENT_PHASE/$MAX_PHASE: $PHASE_NAME | Phase iter $NEXT_PHASE_ITER/$PHASE_MAX_FOR_CURRENT | Global iter $NEXT_GLOBAL"
 SYSTEM_MSG="$SYSTEM_MSG | Mode: $MODE | Severity: $SEVERITY_THRESHOLD"
+if [[ -n "$SCOPE" ]]; then
+  SYSTEM_MSG="$SYSTEM_MSG | Scope: $SCOPE"
+fi
 SYSTEM_MSG="$SYSTEM_MSG | Components: $COMPONENTS_MAPPED | Flows: $FLOWS_MAPPED"
 SYSTEM_MSG="$SYSTEM_MSG | Findings: total=$FINDINGS_TOTAL critical=$FINDINGS_CRITICAL high=$FINDINGS_HIGH"
 SYSTEM_MSG="$SYSTEM_MSG | Review cycles: $REVIEW_CYCLES/$MAX_REVIEW_CYCLES"

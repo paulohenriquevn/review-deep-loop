@@ -69,9 +69,12 @@ Start a deep review loop.
 /review-loop ~/projects/my-api --mode security
 /review-loop ~/projects/my-service --mode quick --max-iterations 40
 /review-loop ~/projects/my-platform --severity-threshold high
+/review-loop ~/projects/my-app --scope "login and authentication"
+/review-loop ~/projects/my-app --scope "payment module" --mode security
 ```
 
 **Options:**
+- `--scope <description>` -- Focus review on a specific module/feature (e.g., "login", "payment module", "kafka cluster")
 - `--mode <full|quick|security|architecture>` -- Review mode (default: full)
 - `--max-iterations <n>` -- Max global iterations (default: 80)
 - `--output-dir <path>` -- Output directory (default: ./review-output)

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Scoped review via `--scope` option: focus the review on a specific module, feature, or subsystem (e.g., `--scope "login"`, `--scope "payment module"`, `--scope "kafka cluster"`)
 - Initial plugin structure with 8-phase pipeline (Baseline, Completeness, Architecture, Code, Infrastructure, Security, Validation, Report)
 - 16 specialized agents for deep software review and audit
 - SQLite database with 9 tables for components, flows, findings, evidence, invariants, threat models, and agent coordination

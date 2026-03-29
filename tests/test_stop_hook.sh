@@ -59,6 +59,7 @@ cat > .claude/review-loop.local.md <<'EOF'
 ---
 active: true
 target: "/tmp/test"
+scope: ""
 current_phase: abc
 phase_name: "baseline"
 phase_iteration: 1
@@ -101,6 +102,7 @@ cat > .claude/review-loop.local.md <<'EOF'
 ---
 active: true
 target: "/tmp/test"
+scope: ""
 current_phase: 9
 phase_name: "invalid"
 phase_iteration: 1
@@ -136,6 +138,7 @@ cat > .claude/review-loop.local.md <<'EOF'
 ---
 active: true
 target: "/tmp/test"
+scope: ""
 current_phase: 3
 phase_name: "architecture"
 phase_iteration: 2
@@ -184,6 +187,7 @@ cat > .claude/review-loop.local.md <<'EOF'
 ---
 active: true
 target: "/tmp/test"
+scope: ""
 current_phase: 2
 phase_name: "completeness"
 phase_iteration: 1

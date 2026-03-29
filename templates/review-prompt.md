@@ -19,6 +19,8 @@ This is NOT a surface-level code review. It is a **deep systemic audit** with:
 
 The report must be **defensible under technical scrutiny** — every finding backed by evidence, every recommendation actionable, every risk quantified.
 
+{{SCOPE_SECTION}}
+
 ---
 
 ## BEFORE ANYTHING ELSE — Project Context + Mandatory Group Meeting

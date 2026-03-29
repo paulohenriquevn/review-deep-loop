@@ -14,6 +14,7 @@ MAX_ITERATIONS=80
 OUTPUT_DIR="./review-output"
 SEVERITY_THRESHOLD="low"
 COMPLETION_PROMISE="DEEP REVIEW COMPLETE"
+SCOPE=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -28,6 +29,9 @@ ARGUMENTS:
   TARGET...    Path to the codebase or project to review
 
 OPTIONS:
+  --scope <description>          Focus review on a specific module, feature, or
+                                 part of the codebase (e.g., "login", "payment
+                                 module", "kafka cluster", "user registration")
   --mode <full|quick|security|architecture>
                                  Review mode (default: full)
   --max-iterations <n>           Max global iterations (default: 80)
@@ -46,6 +50,11 @@ DESCRIPTION:
   architecture and code quality, examines infrastructure and security,
   validates with E2E flows and dogfooding, and produces a consolidated
   findings report with severity-ranked remediation plan.
+
+  When --scope is provided, the review focuses exclusively on the specified
+  module, feature, or subsystem. Only components, flows, and code related
+  to the scope are analyzed. This produces a targeted, deeper review of
+  that specific area rather than a broad system-wide audit.
 
 MODES:
   full           Complete 8-phase deep review (default).
@@ -68,6 +77,9 @@ EXAMPLES:
   /review-loop ~/projects/my-api --mode security
   /review-loop ~/projects/my-service --mode quick --max-iterations 40
   /review-loop ~/projects/my-platform --severity-threshold high --output-dir ./audit
+  /review-loop ~/projects/my-app --scope "login and authentication"
+  /review-loop ~/projects/my-app --scope "payment module" --mode security
+  /review-loop ~/projects/my-app --scope "kafka cluster configuration"
 
 OUTPUT:
   review-output/
@@ -150,6 +162,19 @@ HELP_EOF
       COMPLETION_PROMISE="$2"
       shift 2
       ;;
+    --scope)
+      if [[ -z "${2:-}" ]]; then
+        echo "Error: --scope requires a description of the module/feature to review" >&2
+        echo "" >&2
+        echo "   Examples:" >&2
+        echo "     --scope 'login and authentication'" >&2
+        echo "     --scope 'payment module'" >&2
+        echo "     --scope 'kafka cluster'" >&2
+        exit 1
+      fi
+      SCOPE="$2"
+      shift 2
+      ;;
     *)
       TARGET_PARTS+=("$1")
       shift
@@ -188,6 +213,51 @@ if [[ ! -f "$PROMPT_TEMPLATE" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Build scope section (injected into prompt when --scope is provided)
+# ---------------------------------------------------------------------------
+SCOPE_SECTION=""
+if [[ -n "$SCOPE" ]]; then
+  SCOPE_SECTION=$(cat <<'SCOPE_EOF'
+---
+
+## SCOPED REVIEW — Focused Analysis
+
+> **Scope: {{SCOPE_VALUE}}**
+
+This review is **scoped** to a specific module, feature, or subsystem. All phases, agents, and analysis MUST focus exclusively on the specified scope.
+
+### Scoped Review Rules
+
+1. **Phase 1 (Baseline):** Map ONLY the components, flows, and dependencies that are part of or directly interact with the scoped area. Identify the scope boundary — what is inside vs outside. Still register components and flows in the DB, but only those relevant to the scope.
+
+2. **Phases 2-7:** Analyze ONLY code, architecture, infrastructure, and security within the scope boundary. Findings outside the scope should only be registered if they directly impact the scoped area (e.g., a shared dependency with a vulnerability).
+
+3. **Phase 8 (Report):** The final report covers only the scoped area. Title it clearly: "Deep Review: {{SCOPE_VALUE}}".
+
+### How to Identify Scope Boundaries
+
+- Search the codebase for files, directories, modules, classes, and functions related to the scope description
+- Use keywords, naming conventions, and import graphs to identify what belongs to the scope
+- Map the scope's external dependencies (what it calls) and dependents (what calls it)
+- Document the scope boundary explicitly in `baseline/architecture_map.md`
+
+### What "Scoped" Means in Practice
+
+- If the scope is "login" → review auth controllers, auth services, session management, token handling, login UI, auth middleware, and their tests
+- If the scope is "payment module" → review payment controllers, payment services, billing logic, payment gateway integrations, transaction handling, and their tests
+- If the scope is "kafka cluster" → review Kafka producers, consumers, topic configurations, serialization, error handling, retry logic, and their tests
+- Components outside the scope are noted as "external dependency" but not deeply reviewed
+
+### Scope Context for Agents
+
+When launching specialist agents, always include this context:
+> "This is a SCOPED review focused on: **{{SCOPE_VALUE}}**. Only analyze code, architecture, and flows related to this scope. Flag external dependencies but do not deep-review them."
+SCOPE_EOF
+)
+  SCOPE_SECTION=$(echo "$SCOPE_SECTION" | sed "s|{{SCOPE_VALUE}}|$SCOPE|g")
+fi
+
+# ---------------------------------------------------------------------------
 # Replace placeholders in template
 # ---------------------------------------------------------------------------
 REVIEW_PROMPT=$(sed \
@@ -198,6 +268,13 @@ REVIEW_PROMPT=$(sed \
   -e "s|{{MODE}}|$MODE|g" \
   -e "s|{{SEVERITY_THRESHOLD}}|$SEVERITY_THRESHOLD|g" \
   "$PROMPT_TEMPLATE")
+
+# Inject scope section (multi-line, cannot use sed -e for this)
+if [[ -n "$SCOPE_SECTION" ]]; then
+  REVIEW_PROMPT="${REVIEW_PROMPT//\{\{SCOPE_SECTION\}\}/$SCOPE_SECTION}"
+else
+  REVIEW_PROMPT="${REVIEW_PROMPT//\{\{SCOPE_SECTION\}\}/}"
+fi
 
 # ---------------------------------------------------------------------------
 # Create output directory structure
@@ -229,6 +306,7 @@ cat > .claude/review-loop.local.md <<EOF
 ---
 active: true
 target: "$TARGET_PATH"
+scope: "$SCOPE"
 current_phase: 1
 phase_name: "baseline"
 phase_iteration: 1
@@ -267,6 +345,7 @@ Review Deep Loop activated!
 
 Mode: $MODE_LABEL
 Target: $TARGET_PATH
+$(if [[ -n "$SCOPE" ]]; then echo "Scope: $SCOPE"; fi)
 Severity threshold: $SEVERITY_THRESHOLD
 Output: $OUTPUT_DIR/
 Max iterations: $MAX_ITERATIONS
