@@ -134,16 +134,19 @@ Start a deep review loop.
 ```
 
 **Options:**
-- `--scope <description>` — Focus review on a specific module/feature (e.g., "login", "payment module", "kafka cluster")
-- `--mode <full|quick|security|architecture>` — Review mode (default: full)
-- `--max-iterations <n>` — Max global iterations (default: 80)
-- `--output-dir <path>` — Output directory (default: ./review-output)
-- `--severity-threshold <critical|high|medium|low>` — Min severity to report (default: low)
-- `--completion-promise <text>` — Custom promise (default: "DEEP REVIEW COMPLETE")
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--scope <description>` | Focus review on a specific module, feature, or subsystem. When provided, all phases analyze only code related to the scope. Examples: `"login"`, `"payment module"`, `"kafka cluster"`, `"user registration"`. | entire codebase |
+| `--mode <mode>` | Review mode: `full` (all 8 phases), `quick` (code quality: phases 1,2,3,4,8), `security` (security audit: phases 1,5,6,8), `architecture` (architecture focus: phases 1,2,3,8). | `full` |
+| `--max-iterations <n>` | Maximum number of global iterations before the loop stops automatically. | `80` |
+| `--output-dir <path>` | Directory where all review output is written (reports, database, figures, meeting minutes). | `./review-output` |
+| `--severity-threshold <level>` | Minimum severity level to report. Findings below this threshold are not included. Values: `critical`, `high`, `medium`, `low`. | `low` |
+| `--completion-promise <text>` | Custom phrase the agent must output to signal the review is genuinely complete and exit the loop. | `"DEEP REVIEW COMPLETE"` |
 
 ### /review-status
 
-View current review loop status.
+View current review loop status: phase, iteration, scope, finding counts, output files.
 
 ### /review-cancel
 
